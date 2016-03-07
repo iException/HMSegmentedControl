@@ -20,7 +20,10 @@
 @property (nonatomic, strong) CALayer *selectionIndicatorArrowLayer;
 @property (nonatomic, readwrite) CGFloat segmentWidth;
 @property (nonatomic, readwrite) NSArray *segmentWidthsArray;
+@property (nonatomic, copy) NSDictionary *badgeImagesDictionary;
 @property (nonatomic, strong) HMScrollView *scrollView;
+
+@property (nonatomic) CGSize badgeSize;
 
 @end
 
@@ -457,6 +460,7 @@ static const CGFloat kArrowWidth = 5.0f;
                 CATextLayer *layer = [textLayers objectAtIndex:self.selectedSegmentIndex];
                 [self.layer addSublayer:self.selectionIndicatorArrowLayer];
                 [self.layer insertSublayer:layer above:self.selectionIndicatorArrowLayer];
+                
             }
         } else {
             if (!self.selectionIndicatorStripLayer.superlayer) {
@@ -472,6 +476,10 @@ static const CGFloat kArrowWidth = 5.0f;
     }
     
     self.scrollView.backgroundColor = self.backgroundColor;
+    
+    if (self.selectionStyle == HMSegmentedControlSelectionStyleArrow) {
+        [self setBadgeImage];
+    }
 }
 
 - (void)addBackgroundAndBorderLayerWithRect:(CGRect)fullRect {
@@ -908,6 +916,42 @@ static const CGFloat kArrowWidth = 5.0f;
     
     if (self.indexChangeBlock)
         self.indexChangeBlock(index);
+}
+
+- (void)setBadgeImage:(UIImage *)image atIndex:(NSInteger)index
+{
+    NSString *key = [@(index) stringValue];
+    NSDictionary *dict = @{key: image};
+    self.badgeImagesDictionary = dict;
+}
+
+- (void)setBadgeImage
+{
+    NSArray *keys = [self.badgeImagesDictionary allKeys];
+    for (NSString *key in keys) {
+        NSInteger index = [key integerValue];
+        
+        NSMutableArray *textLayers = [NSMutableArray array];
+        for (CALayer *layer in self.scrollView.layer.sublayers) {
+            if ([layer isKindOfClass:[CATextLayer class]]) {
+                [textLayers addObject:layer];
+            }
+        }
+        
+        CATextLayer *layer = [textLayers objectAtIndex:index];
+        
+        UIImage *image = [self.badgeImagesDictionary objectForKey:key];
+        
+        CALayer *badgeLayer = [[CALayer alloc] init];
+        badgeLayer.contents = (__bridge id _Nullable)(image.CGImage);
+        badgeLayer.frame = CGRectMake(layer.frame.origin.x + layer.frame.size.width, layer.frame.origin.y - layer.frame.size.height / 2, self.badgeSize.width, self.badgeSize.height);
+        [self.scrollView.layer addSublayer:badgeLayer];
+    }
+}
+
+- (void)setBadgeSize:(CGSize)size
+{
+    self.badgeSize = size;
 }
 
 #pragma mark - Styling Support

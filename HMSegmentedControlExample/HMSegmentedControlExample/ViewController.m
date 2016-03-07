@@ -28,7 +28,7 @@
 
     
 //     Segmented control with more customization and indexChangeBlock
-    HMSegmentedControl *segmentedControl3 = [[HMSegmentedControl alloc] initWithSectionTitles:@[@"One", @"Two", @"Three", @"4", @"Five"]];
+    HMSegmentedControl *segmentedControl3 = [[HMSegmentedControl alloc] initWithSectionTitles:@[@"One", @"Two", @"Three"]];
     [segmentedControl3 setFrame:CGRectMake(0, 180, viewWidth, 50)];
     [segmentedControl3 setIndexChangeBlock:^(NSInteger index) {
         NSLog(@"Selected index %ld (via block)", (long)index);
@@ -42,8 +42,11 @@
     segmentedControl3.selectedSegmentIndex = HMSegmentedControlNoSegment;
     segmentedControl3.selectionIndicatorLocation = HMSegmentedControlSelectionIndicatorLocationDown;
     segmentedControl3.shouldAnimateUserSelection = YES;
+    [segmentedControl3 setBadgeImage:[UIImage imageNamed:@"1-selected"] atIndex:2];
     segmentedControl3.tag = 2;
+    
     [self.view addSubview:segmentedControl3];
+    
     
 }
 

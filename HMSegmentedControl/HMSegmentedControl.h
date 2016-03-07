@@ -225,5 +225,7 @@ typedef enum {
 - (void)setSelectedSegmentIndex:(NSUInteger)index animated:(BOOL)animated;
 - (void)setIndexChangeBlock:(IndexChangeBlock)indexChangeBlock;
 - (void)setTitleFormatter:(HMTitleFormatterBlock)titleFormatter;
+- (void)setBadgeImage:(UIImage *)image atIndex:(NSInteger)index;
+- (void)setBadgeSize:(CGSize)size;
 
 @end
