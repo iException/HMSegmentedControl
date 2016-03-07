@@ -475,7 +475,7 @@ static const CGFloat kArrowWidth = 5.0f;
         }
     }
     
-    self.scrollView.backgroundColor = self.backgroundColor;
+    self.scrollView.backgroundColor = self.controlBackgroundColor;
     
     if (self.selectionStyle == HMSegmentedControlSelectionStyleArrow) {
         [self setBadgeImage];
