@@ -267,6 +267,9 @@ static const CGFloat kArrowWidth = 5.0f;
 
 - (void)drawRect:(CGRect)rect {
     
+    [self.backgroundColor setFill];
+    UIRectFill([self bounds]);
+    
     self.selectionIndicatorArrowLayer.backgroundColor = self.selectionIndicatorColor.CGColor;
     
     self.selectionIndicatorStripLayer.backgroundColor = self.selectionIndicatorColor.CGColor;
