@@ -26,6 +26,8 @@
 
 @implementation HMScrollView
 
+static const CGFloat kArrowWidth = 5.0f;
+
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     if (!self.dragging) {
         [self.nextResponder touchesBegan:touches withEvent:event];
@@ -261,8 +263,6 @@
 }
 
 - (void)drawRect:(CGRect)rect {
-    [self.backgroundColor setFill];
-    UIRectFill([self bounds]);
     
     self.selectionIndicatorArrowLayer.backgroundColor = self.selectionIndicatorColor.CGColor;
     
@@ -447,7 +447,16 @@
         if (self.selectionStyle == HMSegmentedControlSelectionStyleArrow) {
             if (!self.selectionIndicatorArrowLayer.superlayer) {
                 [self setArrowFrame];
-                [self.scrollView.layer addSublayer:self.selectionIndicatorArrowLayer];
+                NSMutableArray *textLayers = [NSMutableArray array];
+                for (CALayer *layer in self.scrollView.layer.sublayers) {
+                    if ([layer isKindOfClass:[CATextLayer class]]) {
+                        [textLayers addObject:layer];
+                    }
+                }
+                
+                CATextLayer *layer = [textLayers objectAtIndex:self.selectedSegmentIndex];
+                [self.layer addSublayer:self.selectionIndicatorArrowLayer];
+                [self.layer insertSublayer:layer above:self.selectionIndicatorArrowLayer];
             }
         } else {
             if (!self.selectionIndicatorStripLayer.superlayer) {
@@ -461,6 +470,8 @@
             }
         }
     }
+    
+    self.scrollView.backgroundColor = self.backgroundColor;
 }
 
 - (void)addBackgroundAndBorderLayerWithRect:(CGRect)fullRect {
@@ -497,7 +508,7 @@
 }
 
 - (void)setArrowFrame {
-    self.selectionIndicatorArrowLayer.frame = [self frameForSelectionIndicator];
+    self.selectionIndicatorArrowLayer.frame = CGRectMake(self.selectedSegmentIndex * self.segmentWidth, 0, self.segmentWidth, self.bounds.size.height);
     
     self.selectionIndicatorArrowLayer.mask = nil;
     
@@ -506,22 +517,38 @@
     CGPoint p1 = CGPointZero;
     CGPoint p2 = CGPointZero;
     CGPoint p3 = CGPointZero;
+    CGPoint p4 = CGPointZero;
+    CGPoint p5 = CGPointZero;
+    CGPoint p6 = CGPointZero;
+    CGPoint p7 = CGPointZero;
     
     if (self.selectionIndicatorLocation == HMSegmentedControlSelectionIndicatorLocationDown) {
-        p1 = CGPointMake(self.selectionIndicatorArrowLayer.bounds.size.width / 2, 0);
-        p2 = CGPointMake(0, self.selectionIndicatorArrowLayer.bounds.size.height);
-        p3 = CGPointMake(self.selectionIndicatorArrowLayer.bounds.size.width, self.selectionIndicatorArrowLayer.bounds.size.height);
+        p1 = CGPointMake(0, 0);
+        p2 = CGPointMake(0, self.selectionIndicatorArrowLayer.bounds.size.height - kArrowWidth);
+        p3 = CGPointMake(self.selectionIndicatorArrowLayer.bounds.size.width / 2 - kArrowWidth, self.selectionIndicatorArrowLayer.bounds.size.height - kArrowWidth);
+        p4 = CGPointMake(self.selectionIndicatorArrowLayer.bounds.size.width / 2, self.selectionIndicatorArrowLayer.bounds.size.height);
+        p5 = CGPointMake(self.selectionIndicatorArrowLayer.bounds.size.width / 2 + kArrowWidth, self.selectionIndicatorArrowLayer.bounds.size.height - kArrowWidth);
+        p6 = CGPointMake(self.selectionIndicatorArrowLayer.bounds.size.width, self.selectionIndicatorArrowLayer.bounds.size.height - kArrowWidth);
+        p7 = CGPointMake(self.selectionIndicatorArrowLayer.bounds.size.width, 0);
     }
     
     if (self.selectionIndicatorLocation == HMSegmentedControlSelectionIndicatorLocationUp) {
-        p1 = CGPointMake(self.selectionIndicatorArrowLayer.bounds.size.width / 2, self.selectionIndicatorArrowLayer.bounds.size.height);
-        p2 = CGPointMake(self.selectionIndicatorArrowLayer.bounds.size.width, 0);
-        p3 = CGPointMake(0, 0);
+        p1 = CGPointMake(0, 0);
+        p2 = CGPointMake(self.selectionIndicatorArrowLayer.bounds.size.width / 2 - kArrowWidth, 0);
+        p3 = CGPointMake(self.selectionIndicatorArrowLayer.bounds.size.width / 2, 0 - kArrowWidth);
+        p4 = CGPointMake(self.selectionIndicatorArrowLayer.bounds.size.width / 2 + kArrowWidth, 0);
+        p5 = CGPointMake(self.selectionIndicatorArrowLayer.bounds.size.width, 0);
+        p6 = CGPointMake(self.selectionIndicatorArrowLayer.bounds.size.width, self.selectionIndicatorArrowLayer.bounds.size.height);
+        p7 = CGPointMake(0, self.selectionIndicatorArrowLayer.bounds.size.height);
     }
     
     [arrowPath moveToPoint:p1];
     [arrowPath addLineToPoint:p2];
     [arrowPath addLineToPoint:p3];
+    [arrowPath addLineToPoint:p4];
+    [arrowPath addLineToPoint:p5];
+    [arrowPath addLineToPoint:p6];
+    [arrowPath addLineToPoint:p7];
     [arrowPath closePath];
     
     CAShapeLayer *maskLayer = [[CAShapeLayer alloc] init];
@@ -613,6 +640,9 @@
 - (void)updateSegmentsRects {
     self.scrollView.contentInset = UIEdgeInsetsZero;
     self.scrollView.frame = CGRectMake(0, 0, CGRectGetWidth(self.frame), CGRectGetHeight(self.frame));
+    if (self.selectionStyle == HMSegmentedControlSelectionStyleArrow) {
+        self.scrollView.frame = CGRectMake(0, 0, CGRectGetWidth(self.frame), CGRectGetHeight(self.frame) - kArrowWidth);
+    }
     
     if ([self sectionCount] > 0) {
         self.segmentWidth = self.frame.size.width / [self sectionCount];
@@ -660,6 +690,9 @@
 
     self.scrollView.scrollEnabled = self.isUserDraggable;
     self.scrollView.contentSize = CGSizeMake([self totalSegmentedControlWidth], self.frame.size.height);
+    if (self.selectionStyle == HMSegmentedControlSelectionStyleArrow) {
+        self.scrollView.contentSize = CGSizeMake([self totalSegmentedControlWidth], self.frame.size.height - kArrowWidth);
+    }
 }
 
 - (NSUInteger)sectionCount {
@@ -797,8 +830,28 @@
             // segment index without animating.
             if(self.selectionStyle == HMSegmentedControlSelectionStyleArrow) {
                 if ([self.selectionIndicatorArrowLayer superlayer] == nil) {
-                    [self.scrollView.layer addSublayer:self.selectionIndicatorArrowLayer];
+                    NSMutableArray *textLayers = [NSMutableArray array];
+                    for (CALayer *layer in self.scrollView.layer.sublayers) {
+                        if ([layer isKindOfClass:[CATextLayer class]]) {
+                            [textLayers addObject:layer];
+                        }
+                    }
                     
+                    CATextLayer *layer = [textLayers objectAtIndex:self.selectedSegmentIndex];
+                    [self.layer addSublayer:self.selectionIndicatorArrowLayer];
+                    [self.layer insertSublayer:layer above:self.selectionIndicatorArrowLayer];
+                    [self setSelectedSegmentIndex:index animated:NO notify:YES];
+                    return;
+                } else {
+                    NSMutableArray *textLayers = [NSMutableArray array];
+                    for (CALayer *layer in self.scrollView.layer.sublayers) {
+                        if ([layer isKindOfClass:[CATextLayer class]]) {
+                            [textLayers addObject:layer];
+                        }
+                    }
+                    
+                    CATextLayer *layer = [textLayers objectAtIndex:self.selectedSegmentIndex];
+                    [self.layer insertSublayer:layer above:self.selectionIndicatorArrowLayer];
                     [self setSelectedSegmentIndex:index animated:NO notify:YES];
                     return;
                 }
