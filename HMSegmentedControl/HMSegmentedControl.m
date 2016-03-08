@@ -341,6 +341,12 @@ static const CGFloat kArrowWidth = 5.0f;
             }
         
             [self addBackgroundAndBorderLayerWithRect:fullRect];
+            
+            if (idx == ([self.sectionTitles count] - 1)) {
+                if (self.selectionStyle == HMSegmentedControlSelectionStyleArrow) {
+                    [self setBadgeImage];
+                }
+            }
         }];
     } else if (self.type == HMSegmentedControlTypeImages) {
         [self.sectionImages enumerateObjectsUsingBlock:^(id iconImage, NSUInteger idx, BOOL *stop) {
@@ -479,10 +485,6 @@ static const CGFloat kArrowWidth = 5.0f;
     }
     
     self.scrollView.backgroundColor = self.controlBackgroundColor;
-    
-    if (self.selectionStyle == HMSegmentedControlSelectionStyleArrow) {
-        [self setBadgeImage];
-    }
 }
 
 - (void)addBackgroundAndBorderLayerWithRect:(CGRect)fullRect {
