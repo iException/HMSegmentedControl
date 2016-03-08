@@ -863,8 +863,6 @@ static const CGFloat kArrowWidth = 5.0f;
                     
                     CATextLayer *layer = [textLayers objectAtIndex:self.selectedSegmentIndex];
                     [self.layer insertSublayer:layer above:self.selectionIndicatorArrowLayer];
-                    [self setSelectedSegmentIndex:index animated:NO notify:YES];
-                    return;
                 }
             }else {
                 if ([self.selectionIndicatorStripLayer superlayer] == nil) {
@@ -887,6 +885,7 @@ static const CGFloat kArrowWidth = 5.0f;
             self.selectionIndicatorBoxLayer.actions = nil;
             
             // Animate to new position
+            
             [CATransaction begin];
             [CATransaction setAnimationDuration:0.15f];
             [CATransaction setAnimationTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear]];
@@ -954,7 +953,7 @@ static const CGFloat kArrowWidth = 5.0f;
 
 - (void)setBadgeSize:(CGSize)size
 {
-    self.badgeSize = size;
+    _badgeSize = size;
 }
 
 #pragma mark - Styling Support
