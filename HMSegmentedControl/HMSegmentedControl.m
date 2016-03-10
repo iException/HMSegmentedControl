@@ -21,6 +21,7 @@
 @property (nonatomic, readwrite) CGFloat segmentWidth;
 @property (nonatomic, readwrite) NSArray *segmentWidthsArray;
 @property (nonatomic, copy) NSDictionary *badgeImagesDictionary;
+@property (nonatomic, copy) NSDictionary *badgeLayerDictionary;
 @property (nonatomic, strong) HMScrollView *scrollView;
 
 @property (nonatomic) CGSize badgeSize;
@@ -486,6 +487,11 @@ static const CGFloat kArrowWidth = 5.0f;
                 [self.layer addSublayer:self.selectionIndicatorArrowLayer];
                 [self.layer insertSublayer:self.prevTextLayer above:self.selectionIndicatorArrowLayer];
                 self.lastSelectedLayer = layer;
+                
+                CALayer *badgeImageLayer = [self.badgeLayerDictionary objectForKey:[@(self.selectedSegmentIndex) stringValue]];
+                if (badgeImageLayer) {
+                    [self.layer insertSublayer:badgeImageLayer above:self.prevTextLayer];
+                }
             }
         } else {
             if (!self.selectionIndicatorStripLayer.superlayer) {
@@ -882,6 +888,11 @@ static const CGFloat kArrowWidth = 5.0f;
                     [self.layer insertSublayer:self.prevTextLayer above:self.selectionIndicatorArrowLayer];
                     [self setSelectedSegmentIndex:index animated:NO notify:YES];
                     self.lastSelectedLayer = titleLayer;
+                    
+                    CALayer *badgeImageLayer = [self.badgeLayerDictionary objectForKey:[@(self.selectedSegmentIndex) stringValue]];
+                    if (badgeImageLayer) {
+                        [self.layer insertSublayer:badgeImageLayer above:self.prevTextLayer];
+                    }
                     return;
                 } else {
                     NSMutableArray *textLayers = [NSMutableArray array];
@@ -902,6 +913,11 @@ static const CGFloat kArrowWidth = 5.0f;
 
                     [self.layer insertSublayer:self.prevTextLayer above:self.selectionIndicatorArrowLayer];
                     self.lastSelectedLayer = layer;
+                    
+                    CALayer *badgeImageLayer = [self.badgeLayerDictionary objectForKey:[@(self.selectedSegmentIndex) stringValue]];
+                    if (badgeImageLayer) {
+                        [self.layer insertSublayer:badgeImageLayer above:self.prevTextLayer];
+                    }
                 }
             }else {
                 if ([self.selectionIndicatorStripLayer superlayer] == nil) {
@@ -968,6 +984,7 @@ static const CGFloat kArrowWidth = 5.0f;
 
 - (void)setBadgeImage
 {
+    NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
     NSArray *keys = [self.badgeImagesDictionary allKeys];
     for (NSString *key in keys) {
         NSInteger index = [key integerValue];
@@ -986,8 +1003,10 @@ static const CGFloat kArrowWidth = 5.0f;
         CALayer *badgeLayer = [[CALayer alloc] init];
         badgeLayer.contents = (__bridge id _Nullable)(image.CGImage);
         badgeLayer.frame = CGRectMake(layer.frame.origin.x + layer.frame.size.width, layer.frame.origin.y - layer.frame.size.height / 2, self.badgeSize.width, self.badgeSize.height);
-        [self.scrollView.layer addSublayer:badgeLayer];
+        [self.layer addSublayer:badgeLayer];
+        [dictionary setObject:badgeLayer forKey:key];
     }
+    self.badgeLayerDictionary = dictionary;
 }
 
 - (void)setBadgeSize:(CGSize)size
