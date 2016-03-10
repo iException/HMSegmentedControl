@@ -25,6 +25,11 @@
 
 @property (nonatomic) CGSize badgeSize;
 
+@property (nonatomic) CATextLayer *prevTextLayer; //盖在上面的layer
+
+@property (nonatomic) CATextLayer *lastSelectedLayer;
+@property (nonatomic) NSInteger lastSelectedIndex;
+
 @end
 
 @implementation HMScrollView
@@ -465,11 +470,22 @@ static const CGFloat kArrowWidth = 5.0f;
                         [textLayers addObject:layer];
                     }
                 }
-                
+                if (self.lastSelectedLayer) {
+                    self.lastSelectedLayer.string = [self attributedTitleAtIndex:self.lastSelectedIndex];
+                }
                 CATextLayer *layer = [textLayers objectAtIndex:self.selectedSegmentIndex];
+                layer.string = [self attributedTitleAtIndex:self.selectedSegmentIndex];
+                CATextLayer *titleLayer = [CATextLayer layer];
+                titleLayer.frame = layer.frame;
+                titleLayer.alignmentMode = kCAAlignmentCenter;
+                titleLayer.truncationMode = kCATruncationEnd;
+                titleLayer.string = [self attributedTitleAtIndex:self.selectedSegmentIndex];
+                titleLayer.contentsScale = [[UIScreen mainScreen] scale];
+                self.prevTextLayer = titleLayer;
+                layer.hidden = YES;
                 [self.layer addSublayer:self.selectionIndicatorArrowLayer];
-                [self.layer insertSublayer:layer above:self.selectionIndicatorArrowLayer];
-                
+                [self.layer insertSublayer:self.prevTextLayer above:self.selectionIndicatorArrowLayer];
+                self.lastSelectedLayer = layer;
             }
         } else {
             if (!self.selectionIndicatorStripLayer.superlayer) {
@@ -827,6 +843,7 @@ static const CGFloat kArrowWidth = 5.0f;
 }
 
 - (void)setSelectedSegmentIndex:(NSUInteger)index animated:(BOOL)animated notify:(BOOL)notify {
+    _lastSelectedIndex = _selectedSegmentIndex;
     _selectedSegmentIndex = index;
     [self setNeedsDisplay];
     
@@ -849,11 +866,22 @@ static const CGFloat kArrowWidth = 5.0f;
                             [textLayers addObject:layer];
                         }
                     }
-                    
+                    if (self.lastSelectedLayer) {
+                        self.lastSelectedLayer.string = [self attributedTitleAtIndex:self.lastSelectedIndex];
+                    }
                     CATextLayer *layer = [textLayers objectAtIndex:self.selectedSegmentIndex];
+                    layer.string = [self attributedTitleAtIndex:self.selectedSegmentIndex];
+                    CATextLayer *titleLayer = [CATextLayer layer];
+                    titleLayer.frame = layer.frame;
+                    titleLayer.alignmentMode = kCAAlignmentCenter;
+                    titleLayer.truncationMode = kCATruncationEnd;
+                    titleLayer.string = [self attributedTitleAtIndex:self.selectedSegmentIndex];
+                    titleLayer.contentsScale = [[UIScreen mainScreen] scale];
+                    self.prevTextLayer = titleLayer;
                     [self.layer addSublayer:self.selectionIndicatorArrowLayer];
-                    [self.layer insertSublayer:layer above:self.selectionIndicatorArrowLayer];
+                    [self.layer insertSublayer:self.prevTextLayer above:self.selectionIndicatorArrowLayer];
                     [self setSelectedSegmentIndex:index animated:NO notify:YES];
+                    self.lastSelectedLayer = titleLayer;
                     return;
                 } else {
                     NSMutableArray *textLayers = [NSMutableArray array];
@@ -862,9 +890,18 @@ static const CGFloat kArrowWidth = 5.0f;
                             [textLayers addObject:layer];
                         }
                     }
-                    
                     CATextLayer *layer = [textLayers objectAtIndex:self.selectedSegmentIndex];
-                    [self.layer insertSublayer:layer above:self.selectionIndicatorArrowLayer];
+                    layer.string = [self attributedTitleAtIndex:self.selectedSegmentIndex];
+                    if (self.lastSelectedLayer) {
+                        self.lastSelectedLayer.hidden = NO;
+                        self.lastSelectedLayer.string = [self attributedTitleAtIndex:self.lastSelectedIndex];
+                        self.prevTextLayer.frame = layer.frame;
+                        self.prevTextLayer.string = [self attributedTitleAtIndex:self.selectedSegmentIndex];
+                        layer.hidden = YES;
+                    }
+
+                    [self.layer insertSublayer:self.prevTextLayer above:self.selectionIndicatorArrowLayer];
+                    self.lastSelectedLayer = layer;
                 }
             }else {
                 if ([self.selectionIndicatorStripLayer superlayer] == nil) {
