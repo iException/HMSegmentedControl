@@ -875,23 +875,25 @@ static const CGFloat kArrowWidth = 5.0f;
                     if (self.lastSelectedLayer) {
                         self.lastSelectedLayer.string = [self attributedTitleAtIndex:self.lastSelectedIndex];
                     }
-                    CATextLayer *layer = [textLayers objectAtIndex:self.selectedSegmentIndex];
-                    layer.string = [self attributedTitleAtIndex:self.selectedSegmentIndex];
-                    CATextLayer *titleLayer = [CATextLayer layer];
-                    titleLayer.frame = layer.frame;
-                    titleLayer.alignmentMode = kCAAlignmentCenter;
-                    titleLayer.truncationMode = kCATruncationEnd;
-                    titleLayer.string = [self attributedTitleAtIndex:self.selectedSegmentIndex];
-                    titleLayer.contentsScale = [[UIScreen mainScreen] scale];
-                    self.prevTextLayer = titleLayer;
-                    [self.layer addSublayer:self.selectionIndicatorArrowLayer];
-                    [self.layer insertSublayer:self.prevTextLayer above:self.selectionIndicatorArrowLayer];
-                    [self setSelectedSegmentIndex:index animated:NO notify:YES];
-                    self.lastSelectedLayer = titleLayer;
-                    
-                    CALayer *badgeImageLayer = [self.badgeLayerDictionary objectForKey:[@(self.selectedSegmentIndex) stringValue]];
-                    if (badgeImageLayer) {
-                        [self.layer insertSublayer:badgeImageLayer above:self.prevTextLayer];
+                    if (self.selectedSegmentIndex < textLayers.count) {
+                        CATextLayer *layer = [textLayers objectAtIndex:self.selectedSegmentIndex];
+                        layer.string = [self attributedTitleAtIndex:self.selectedSegmentIndex];
+                        CATextLayer *titleLayer = [CATextLayer layer];
+                        titleLayer.frame = layer.frame;
+                        titleLayer.alignmentMode = kCAAlignmentCenter;
+                        titleLayer.truncationMode = kCATruncationEnd;
+                        titleLayer.string = [self attributedTitleAtIndex:self.selectedSegmentIndex];
+                        titleLayer.contentsScale = [[UIScreen mainScreen] scale];
+                        self.prevTextLayer = titleLayer;
+                        [self.layer addSublayer:self.selectionIndicatorArrowLayer];
+                        [self.layer insertSublayer:self.prevTextLayer above:self.selectionIndicatorArrowLayer];
+                        [self setSelectedSegmentIndex:index animated:NO notify:YES];
+                        self.lastSelectedLayer = titleLayer;
+                        
+                        CALayer *badgeImageLayer = [self.badgeLayerDictionary objectForKey:[@(self.selectedSegmentIndex) stringValue]];
+                        if (badgeImageLayer) {
+                            [self.layer insertSublayer:badgeImageLayer above:self.prevTextLayer];
+                        }
                     }
                     return;
                 } else {
@@ -901,22 +903,24 @@ static const CGFloat kArrowWidth = 5.0f;
                             [textLayers addObject:layer];
                         }
                     }
-                    CATextLayer *layer = [textLayers objectAtIndex:self.selectedSegmentIndex];
-                    layer.string = [self attributedTitleAtIndex:self.selectedSegmentIndex];
-                    if (self.lastSelectedLayer) {
-                        self.lastSelectedLayer.hidden = NO;
-                        self.lastSelectedLayer.string = [self attributedTitleAtIndex:self.lastSelectedIndex];
-                        self.prevTextLayer.frame = layer.frame;
-                        self.prevTextLayer.string = [self attributedTitleAtIndex:self.selectedSegmentIndex];
-                        layer.hidden = YES;
-                    }
-
-                    [self.layer insertSublayer:self.prevTextLayer above:self.selectionIndicatorArrowLayer];
-                    self.lastSelectedLayer = layer;
-                    
-                    CALayer *badgeImageLayer = [self.badgeLayerDictionary objectForKey:[@(self.selectedSegmentIndex) stringValue]];
-                    if (badgeImageLayer) {
-                        [self.layer insertSublayer:badgeImageLayer above:self.prevTextLayer];
+                    if (self.selectedSegmentIndex < textLayers.count) {
+                        CATextLayer *layer = [textLayers objectAtIndex:self.selectedSegmentIndex];
+                        layer.string = [self attributedTitleAtIndex:self.selectedSegmentIndex];
+                        if (self.lastSelectedLayer) {
+                            self.lastSelectedLayer.hidden = NO;
+                            self.lastSelectedLayer.string = [self attributedTitleAtIndex:self.lastSelectedIndex];
+                            self.prevTextLayer.frame = layer.frame;
+                            self.prevTextLayer.string = [self attributedTitleAtIndex:self.selectedSegmentIndex];
+                            layer.hidden = YES;
+                        }
+                        
+                        [self.layer insertSublayer:self.prevTextLayer above:self.selectionIndicatorArrowLayer];
+                        self.lastSelectedLayer = layer;
+                        
+                        CALayer *badgeImageLayer = [self.badgeLayerDictionary objectForKey:[@(self.selectedSegmentIndex) stringValue]];
+                        if (badgeImageLayer) {
+                            [self.layer insertSublayer:badgeImageLayer above:self.prevTextLayer];
+                        }
                     }
                 }
             }else {
