@@ -22,6 +22,8 @@
 @property (nonatomic, readwrite) NSArray *segmentWidthsArray;
 @property (nonatomic, copy) NSDictionary *badgeImagesDictionary;
 @property (nonatomic, copy) NSDictionary *badgeLayerDictionary;
+@property (nonatomic, copy) NSDictionary *badgeNumberDictionary;
+@property (nonatomic, copy) NSDictionary *badgeNumberLayerDictionary;
 @property (nonatomic, strong) HMScrollView *scrollView;
 
 @property (nonatomic) CGSize badgeSize;
@@ -308,7 +310,7 @@ static const CGFloat kArrowWidth = 5.0f;
                 rect = CGRectMake((self.segmentWidth * idx) + (self.segmentWidth - stringWidth) / 2, y, stringWidth, stringHeight);
                 rectDiv = CGRectMake((self.segmentWidth * idx) - (self.verticalDividerWidth / 2), self.selectionIndicatorHeight * 2, self.verticalDividerWidth, self.frame.size.height - (self.selectionIndicatorHeight * 4));
                 fullRect = CGRectMake(self.segmentWidth * idx, 0, self.segmentWidth, oldRect.size.height);
-            } else if (self.segmentWidthStyle == HMSegmentedControlSegmentWidthStyleDynamic) {
+            } else {
                 // When we are drawing dynamic widths, we need to loop the widths array to calculate the xOffset
                 CGFloat xOffset = 0;
                 NSInteger i = 0;
@@ -352,6 +354,7 @@ static const CGFloat kArrowWidth = 5.0f;
                 if (self.selectionStyle == HMSegmentedControlSelectionStyleArrow) {
                     [self setBadgeImage];
                 }
+                [self setBadgeNumber];
             }
         }];
     } else if (self.type == HMSegmentedControlTypeImages) {
@@ -813,7 +816,7 @@ static const CGFloat kArrowWidth = 5.0f;
                                           self.frame.size.height);
         
         selectedSegmentOffset = (CGRectGetWidth(self.frame) / 2) - (self.segmentWidth / 2);
-    } else if (self.segmentWidthStyle == HMSegmentedControlSegmentWidthStyleDynamic) {
+    } else {
         NSInteger i = 0;
         CGFloat offsetter = 0;
         for (NSNumber *width in self.segmentWidthsArray) {
@@ -984,6 +987,53 @@ static const CGFloat kArrowWidth = 5.0f;
     NSString *key = [@(index) stringValue];
     NSDictionary *dict = @{key: image};
     self.badgeImagesDictionary = dict;
+}
+
+- (void)setBadgeNumber:(NSInteger)number atIndex:(NSInteger)index
+{
+    NSString *key = [@(index) stringValue];
+    NSMutableDictionary *dicts = [self.badgeNumberDictionary mutableCopy];
+    if (!dicts) { dicts = [NSMutableDictionary dictionary]; }
+    [dicts setObject:@(number) forKey:key];
+    self.badgeNumberDictionary  = dicts;
+}
+
+- (void)setBadgeNumber
+{
+    NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+    NSArray *keys = [self.badgeNumberDictionary allKeys];
+    for (NSString *key in keys) {
+        NSInteger index = [key integerValue];
+        
+        NSMutableArray *textLayers = [NSMutableArray array];
+        for (CALayer *layer in self.scrollView.layer.sublayers) {
+            if ([layer isKindOfClass:[CATextLayer class]]) {
+                [textLayers addObject:layer];
+            }
+        }
+        
+        CATextLayer *layer = [textLayers objectAtIndex:index];
+        NSNumber *badgeNumber = [self.badgeNumberDictionary objectForKey:key];
+        NSString *badgeNumberStr = ([badgeNumber integerValue] > 99) ? @"99+" : [badgeNumber stringValue];
+        CGSize maximumLabelSize = CGSizeMake(self.bounds.size.width, 16);
+        CGSize size = [badgeNumberStr boundingRectWithSize:maximumLabelSize options:NSStringDrawingUsesLineFragmentOrigin attributes:@{ NSFontAttributeName : [UIFont systemFontOfSize:12] } context:nil].size;
+        
+        CATextLayer *badgeLayer = [[CATextLayer alloc] init];
+        badgeLayer.backgroundColor = [UIColor redColor].CGColor;
+        badgeLayer.foregroundColor = [UIColor whiteColor].CGColor;
+        badgeLayer.alignmentMode = kCAAlignmentCenter;
+        [badgeLayer setFrame:CGRectMake(layer.frame.origin.x + layer.frame.size.width, layer.frame.origin.y - layer.frame.size.height / 2, size.width + 7, 16)];
+        badgeLayer.wrapped = YES;
+        badgeLayer.cornerRadius = 7.0f;
+        [badgeLayer setFontSize:12];
+        [badgeLayer setString:badgeNumberStr];
+        badgeLayer.anchorPoint = CGPointMake(0.5, 0.5);
+        badgeLayer.contentsScale = [[UIScreen mainScreen] scale];
+        
+        [self.layer addSublayer:badgeLayer];
+        [dictionary setObject:badgeLayer forKey:key];
+    }
+    self.badgeNumberLayerDictionary = dictionary;
 }
 
 - (void)setBadgeImage

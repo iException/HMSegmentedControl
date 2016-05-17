@@ -34,16 +34,15 @@
         NSLog(@"Selected index %ld (via block)", (long)index);
     }];
     segmentedControl3.selectionIndicatorHeight = 4.0f;
-    segmentedControl3.backgroundColor = [UIColor colorWithRed:0.1 green:0.4 blue:0.8 alpha:1];
-    segmentedControl3.titleTextAttributes = @{NSForegroundColorAttributeName : [UIColor blueColor]};
-    segmentedControl3.selectedTitleTextAttributes = @{NSForegroundColorAttributeName : [UIColor whiteColor]};
+    segmentedControl3.backgroundColor = [UIColor whiteColor];
+    segmentedControl3.titleTextAttributes = @{NSForegroundColorAttributeName : [UIColor blackColor]};
+    segmentedControl3.selectedTitleTextAttributes = @{NSForegroundColorAttributeName : [UIColor blueColor]};
     segmentedControl3.selectionIndicatorColor = [UIColor colorWithRed:0.5 green:0.8 blue:1 alpha:1];
-    segmentedControl3.selectionStyle = HMSegmentedControlSelectionStyleArrow;
+    segmentedControl3.selectionStyle = HMSegmentedControlSelectionStyleTextWidthStripe;
     segmentedControl3.selectedSegmentIndex = 1;
     segmentedControl3.selectionIndicatorLocation = HMSegmentedControlSelectionIndicatorLocationDown;
     segmentedControl3.shouldAnimateUserSelection = YES;
-    [segmentedControl3 setBadgeImage:[UIImage imageNamed:@"1-selected"] atIndex:2];
-    [segmentedControl3 setBadgeSize:CGSizeMake(23, 14)];
+    [segmentedControl3 setBadgeNumber:100 atIndex:1];
     segmentedControl3.tag = 2;
     
     [self.view addSubview:segmentedControl3];
